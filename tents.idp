@@ -28,15 +28,15 @@ structure S: V {
     
     // Rij en kolom starten vanaf 1 in de linkerbovenhoek
     AantalPerRij = {
-		1 -> 2;
-        2 -> 0;
+        1 -> 2;
+      	2 -> 0;
         3 -> 2;
         4 -> 0;
         5 -> 1;
     }
     
     AantalPerKolom = {
-		1 -> 2;
+        1 -> 2;
         2 -> 0;
         3 -> 1;
         4 -> 0;
