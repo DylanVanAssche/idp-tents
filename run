@@ -1,0 +1,3 @@
+#!/usr/bin/bash
+
+/usr/bin/idp $1 | ./tents.py
