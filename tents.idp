@@ -54,16 +54,22 @@ structure S: V {
 
 theory T: V {
     // Elke tent is verbonden met exact 1 boom (horizontaal of verticaal)
+    // Tent mag naast meerdere bomen staan, maar slechts verbonden met 1 boom
     
+    // Een tent mag enkel verbonden worden met een boom
+    // Dit mapt de tenten op de juiste plaats al maar de Verbonden = {} is nu met alle bomen. We moeten dit limiteren tot 1 boom per tent.
+    !rt[Rij], kt[Kolom], rb[Rij], kb[Kolom]: Tenten(rt, kt) & Bomen(rb, kb) <=> Verbonden(rt, kt, rb, kb).
+    
+    // Elke tent mag met slechts 1 boom verbonden worden
     
     // Evenveel tenten als bomen
     #{r[Rij], k[Kolom]: Tenten(r,k)} = #{r[Rij], k[Kolom]: Bomen(r,k)}.
     
-    // Tent mag naast meerdere bomen staan, maar slechts verbonden met 1 boom
-    
     // De getallen geven aan hoeveel tenten er in de gegeven rij of kolom mogen staan
     !r[Rij]: AantalPerRij(r) = #{k[Kolom]: Tenten(r, k)}.
     !k[Kolom]: AantalPerKolom(k) = #{r[Rij]: Tenten(r, k)}.
+    
+    // Tenten mogen elkaar niet raken
 }
 
 procedure main() {
