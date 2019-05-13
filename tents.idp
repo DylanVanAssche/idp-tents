@@ -10,11 +10,13 @@ vocabulary V {
     type Aantal isa int
     
     // Relaties
-    Tenten(Rij, Kolom) // Vak is een tent
-    Bomen(Rij, Kolom) // Vak is een boom
+    Tenten(Rij, Kolom) 		// Vak is een tent
+    Bomen(Rij, Kolom) 		// Vak is een boom
+    
     // Geen Leeg want af te leiden uit Tenten en Bomen
-    AantalPerRij(Rij, Aantal)
-    AantalPerKolom(Kolom, Aantal)
+    AantalPerRij(Rij): Aantal
+    AantalPerKolom(Kolom): Aantal
+    
     Verbonden(Rij, Kolom, Rij, Kolom) // Tent rij, Tent kolom, Boom rij, Boom kolom
 }
 
@@ -26,19 +28,21 @@ structure S: V {
     
     // Rij en kolom starten vanaf 1 in de linkerbovenhoek
     AantalPerRij = {
-		1,2;
-        2,0;
-        3,2;
-        4,0;
-        5,1;
+		1 -> 2;
+        2 -> 0;
+        3 -> 2;
+        4 -> 0;
+        5 -> 1;
     }
+    
     AantalPerKolom = {
-		1,2;
-        2,0;
-        3,1;
-        4,0;
-        5,2;
+		1 -> 2;
+        2 -> 0;
+        3 -> 1;
+        4 -> 0;
+        5 -> 2;
     }
+    
    	Bomen = {
         1,2;
         2,5;
@@ -51,14 +55,18 @@ structure S: V {
 theory T: V {
     // Elke tent is verbonden met exact 1 boom (horizontaal of verticaal)
     
+    
     // Evenveel tenten als bomen
+    #{r[Rij], k[Kolom]: Tenten(r,k)} = #{r[Rij], k[Kolom]: Bomen(r,k)}.
     
     // Tent mag naast meerdere bomen staan, maar slechts verbonden met 1 boom
     
     // De getallen geven aan hoeveel tenten er in de gegeven rij of kolom mogen staan
+    !r[Rij]: AantalPerRij(r) = #{k[Kolom]: Tenten(r, k)}.
+    !k[Kolom]: AantalPerKolom(k) = #{r[Rij]: Tenten(r, k)}.
 }
 
 procedure main() {
-    stdoptions.nbmodels = 10
+    stdoptions.nbmodels = 3
     printmodels(modelexpand(T, S))
 }
