@@ -103,18 +103,20 @@ structure Moeilijk: V {
 theory T: V {
      
     /** Een tent wordt verbonden met een boom **/
-	// Als een tent en boom verbonden zijn, moeten ze buren zijn.
+	// Als een tent en boom verbonden zijn, moeten ze horizontale of verticale buren zijn.
     !rb, kb, rt, kt: Verbonden(rt, kt, rb, kb) => 
-    												Tenten(rt, kt) & 
+    												Tenten(rt, kt) &
     												Bomen(rb, kb) & 
-    												(Buren(rt, kt, rb, kb) | Buren(rb, kb, rt, kt)).
+    												(Buren(rt, kt, rb, kb) | Buren(rb, kb, rt, kt)) & // Buren
+    												(((rt = rb + 1) & kt = kb) | ((rt = rb - 1) & kt = kb) |
+    												((kt = kb + 1) & rt = rb) | ((kt = kb - 1) & rt = rb)).
+    												// Enkel horizontaal of verticaal
     
     // Elke boom mag maximum verbonden zijn met 1 tent
     !rb kb: Bomen(rb,kb) => (#{rt[Rij], kt[Kolom]: Tenten(rt,kt) & Verbonden(rt, kt, rb, kb)} = 1).
     
     // Elke tent mag maximim verbonden zijn met 1 boom
     !rt kt: Tenten(rt,kt) => (#{rb[Rij], kb[Kolom]: Bomen(rb,kb) & Verbonden(rt, kt, rb, kb)} = 1).
-    
     
     
     /** evenveel tenten als bomen **/
@@ -147,6 +149,7 @@ theory T: V {
     
     // Tenten mogen geen buren zijn
     !r1, r2, k1, k2: Tenten(r1, k1) & Tenten(r2, k2) => ~Buren(r1, k1, r2, k2).
+    
 }
 
 procedure main() {
