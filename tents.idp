@@ -57,21 +57,19 @@ structure S: V {
 }
 
 theory T: V {
-    // Elke tent is verbonden met exact 1 boom (horizontaal of verticaal)
-    // Tent mag naast meerdere bomen staan, maar slechts verbonden met 1 boom
-    
-    
+     
     /** Een tent wordt verbonden met een boom **/
+	// Als een tent en boom verbonden zijn, moeten ze buren zijn.
+    !rb, kb, rt, kt: Verbonden(rt, kt, rb, kb) => 
+    												Tenten(rt, kt) & 
+    												Bomen(rb, kb) & 
+    												(Buren(rt, kt, rb, kb) | Buren(rb, kb, rt, kt)).
     
-    !rb, kb: ?rt, kt: Tenten(rt, kt) & Bomen(rb, kb) & Buren(rt, kt, rb, kb) <=> Verbonden(rt, kt, rb, kb).
+    // Elke boom mag maximum verbonden zijn met 1 tent
+    !rb kb: Bomen(rb,kb) => (#{rt[Rij], kt[Kolom]: Tenten(rt,kt) & Verbonden(rt, kt, rb, kb)} = 1).
     
-    !rb kb: Bomen(rb,kb) => (#{rt, kt: Tenten(rt,kt) & Verbonden(rt, kt, rb, kb)} = 1).
-    
-    //#{rt, kt, rb, kb: Verbonden(rt, kt, rb, kb)} = #{r[Rij], k[Kolom]: Bomen(r,k)}.
-    
-    
-    /** Elke tent mag met slechts 1 boom verbonden worden **/
-    //!rt[Rij], kt[Kolom]: Tenten(rt, kt) => #{rb[Rij], kb[Kolom]: Bomen(rb, kb) & Verbonden(rt, kt, rb, kb)} = 1.
+    // Elke tent mag maximim verbonden zijn met 1 boom
+    !rt kt: Tenten(rt,kt) => (#{rb[Rij], kb[Kolom]: Bomen(rb,kb) & Verbonden(rt, kt, rb, kb)} = 1).
     
     
     
@@ -91,10 +89,10 @@ theory T: V {
     // Definieer wat een buur is
     {
         !r1, r2, k1, k2: Buren(r1, k1, r2, k2) <- ((r1 = r2+1) & (k1 = k2)).	// Niet raken verticaal
-        !r1, r2, k1, k2: Buren(r1, k1, r2, k2) <- ((r1 = r2-1) & (k1 = k2)).
+        //!r1, r2, k1, k2: Buren(r1, k1, r2, k2) <- ((r1 = r2-1) & (k1 = k2)).
         
 		!r1, r2, k1, k2: Buren(r1, k1, r2, k2) <- ((r1 = r2)   & (k1 = k2+1)).	// Niet raken horizontaal
-        !r1, r2, k1, k2: Buren(r1, k1, r2, k2) <- ((r1 = r2)   & (k1 = k2-1)).
+        //!r1, r2, k1, k2: Buren(r1, k1, r2, k2) <- ((r1 = r2)   & (k1 = k2-1)).
         
         !r1, r2, k1, k2: Buren(r1, k1, r2, k2) <- ((r1 = r2-1) & (k1 = k2-1)).	// Niet op Hoofddiagonaal
         !r1, r2, k1, k2: Buren(r1, k1, r2, k2) <- ((r1 = r2+1) & (k1 = k2+1)).
