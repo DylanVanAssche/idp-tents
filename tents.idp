@@ -18,6 +18,8 @@ vocabulary V {
     AantalPerKolom(Kolom): Aantal
     
     Verbonden(Rij, Kolom, Rij, Kolom) // Tent rij, Tent kolom, Boom rij, Boom kolom
+    
+    Buren(Rij, Kolom, Rij, Kolom) 	// 2x Tent
 }
 
 structure S: V {
@@ -56,20 +58,46 @@ theory T: V {
     // Elke tent is verbonden met exact 1 boom (horizontaal of verticaal)
     // Tent mag naast meerdere bomen staan, maar slechts verbonden met 1 boom
     
-    // Een tent mag enkel verbonden worden met een boom
+    
+    
+    /** Een tent wordt verbonden met een boom **/
     !rt[Rij], kt[Kolom], rb[Rij], kb[Kolom]: Tenten(rt, kt) & Bomen(rb, kb) <=> Verbonden(rt, kt, rb, kb).
     
-    // Elke tent mag met slechts 1 boom verbonden worden
+    
+    
+    /** Elke tent mag met slechts 1 boom verbonden worden **/
     //!rt[Rij], kt[Kolom]: Tenten(rt, kt) => #{rb[Rij], kb[Kolom]: Bomen(rb, kb) & Verbonden(rt, kt, rb, kb)} = 1.
     
-    // Evenveel tenten als bomen
-    #{r[Rij], k[Kolom]: Tenten(r,k)} = #{r[Rij], k[Kolom]: Bomen(r,k)}. // Dit is niet nodig omdat de getallen naast elke rij of kolom dit reeds aangeven
     
-    // De getallen geven aan hoeveel tenten er in de gegeven rij of kolom mogen staan
+    
+    /** evenveel tenten als bomen **/
+    // Dit is niet nodig omdat de getallen naast elke rij of kolom dit reeds aangeven
+    #{r[Rij], k[Kolom]: Tenten(r,k)} = #{r[Rij], k[Kolom]: Bomen(r,k)}. 
+    
+    
+    
+    /** De getallen geven aan hoeveel tenten er in de gegeven rij of kolom mogen staan **/
     !r[Rij]: AantalPerRij(r) = #{k[Kolom]: Tenten(r, k)}.
     !k[Kolom]: AantalPerKolom(k) = #{r[Rij]: Tenten(r, k)}.
     
-    // Tenten mogen elkaar niet raken
+    
+    
+    /** Tenten mogen elkaar niet raken **/
+    // Definieer wat een buur is
+    {
+        !r1, r2, k1, k2: Buren(r1, k1, r2, k2) <- ((r1 = r2+1) & (k1 = k2)).	// Niet raken verticaal
+        
+		!r1, r2, k1, k2: Buren(r1, k1, r2, k2) <- ((r1 = r2)   & (k1 = k2+1)).	// Niet raken horizontaal
+        
+        !r1, r2, k1, k2: Buren(r1, k1, r2, k2) <- ((r1 = r2-1) & (k1 = k2-1)).	// Niet op Hoofddiagonaal
+        !r1, r2, k1, k2: Buren(r1, k1, r2, k2) <- ((r1 = r2+1) & (k1 = k2+1)).
+        
+        !r1, r2, k1, k2: Buren(r1, k1, r2, k2) <- ((r1 = r2+1) & (k1 = k2-1)).	// Niet op 2de diagonaal
+        !r1, r2, k1, k2: Buren(r1, k1, r2, k2) <- ((r1 = r2-1) & (k1 = k2+1)).
+    }
+    
+    // Tenten mogen geen buren zijn
+    !r1, r2, k1, k2: Tenten(r1, k1) & Tenten(r2, k2) => ~Buren(r1, k1, r2, k2).
 }
 
 procedure main() {
