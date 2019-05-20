@@ -14,6 +14,15 @@ def parse():
             parse = False
             model_count += 1
 
+        if parse and ("Kolom" in line) and not ("AantalPerKolom" in line):
+            name, data = line.strip().split(" = ")
+            data = data.replace("{", "")
+            data = data.replace("}", "")
+            data = data.replace(" ", "")
+            global ROWS, COLUMNS
+            ROWS = int(data.split('..')[1])
+            COLUMNS = ROWS
+
         if parse and ("Bomen" in line or "Tenten" in line or "Verbonden" in line):
             name, data = line.strip().split(" = ")
             data = data.replace("{", "")
@@ -29,7 +38,6 @@ def parse():
             models[model_count][name] = output
 
         if parse and ("AantalPerRij" in line or "AantalPerKolom" in line):
-            print(line)
             name, data = line.strip().split(" = ")
             data = data.replace("{", "")
             data = data.replace("}", "")
