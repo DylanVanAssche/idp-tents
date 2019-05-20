@@ -20,8 +20,11 @@ vocabulary V {
  	// Tent verbonden aan boom   
     Verbonden(Rij, Kolom, Rij, Kolom) // Tent rij, Tent kolom, Boom rij, Boom kolom
  
-    // Welke vakken liggen naast elkaar
-    Buren(Rij, Kolom, Rij, Kolom)
+    // Welke vakken liggen diagonaal naast elkaar
+    BurenDiagonaal(Rij, Kolom, Rij, Kolom)
+    
+    // Welke vakken liggen Horizontaal en Verticaal naast elkaar
+    BurenHV(Rij, Kolom, Rij, Kolom)
 }
 
 structure Voorbeeld: V {
@@ -55,7 +58,7 @@ structure Voorbeeld: V {
     }
 }
 
-structure Moeilijk: V {
+structure Medium: V {
     // 8x8 vierkant
     Rij = {1 .. 8}
     Kolom = {1 .. 8}
@@ -99,24 +102,66 @@ structure Moeilijk: V {
     }
 }
 
+structure Moeilijk: V {
+    // 8x8 vierkant
+    Rij = {1 .. 8}
+    Kolom = {1 .. 8}
+    
+    // Rij en kolom starten vanaf 1 in de linkerbovenhoek
+    AantalPerRij = {
+        1 -> 3;
+      	2 -> 1;
+        3 -> 1;
+        4 -> 0;
+        5 -> 2;
+        6 -> 1;
+        7 -> 1;
+        8 -> 3;
+    }
+    
+    AantalPerKolom = {
+        1 -> 2;
+      	2 -> 1;
+        3 -> 2;
+        4 -> 1;
+        5 -> 1;
+        6 -> 2;
+        7 -> 1;
+        8 -> 2;
+    }
+    
+   	Bomen = {
+        1,2;
+        1,7;
+        2,3;
+        3,4;
+        3,8;
+        4,2;
+        5,6;
+        6,3;
+        7,3;
+        7,7;
+        8,2;
+        8,5;
+    }
+}
+
 
 theory T: V {
      
     /** Een tent wordt verbonden met een boom **/
-	// Als een tent en boom verbonden zijn, moeten ze horizontale of verticale buren zijn.
+	// Als een tent en boom verbonden zijn, moeten ze buren zijn.
     !rb, kb, rt, kt: Verbonden(rt, kt, rb, kb) => 
-    												Tenten(rt, kt) &
+    												Tenten(rt, kt) & 
     												Bomen(rb, kb) & 
-    												(Buren(rt, kt, rb, kb) | Buren(rb, kb, rt, kt)) & // Buren
-    												(((rt = rb + 1) & kt = kb) | ((rt = rb - 1) & kt = kb) |
-    												((kt = kb + 1) & rt = rb) | ((kt = kb - 1) & rt = rb)).
-    												// Enkel horizontaal of verticaal
+    												(BurenHV(rt, kt, rb, kb) | BurenHV(rb, kb, rt, kt)).
     
     // Elke boom mag maximum verbonden zijn met 1 tent
     !rb kb: Bomen(rb,kb) => (#{rt[Rij], kt[Kolom]: Tenten(rt,kt) & Verbonden(rt, kt, rb, kb)} = 1).
     
     // Elke tent mag maximim verbonden zijn met 1 boom
     !rt kt: Tenten(rt,kt) => (#{rb[Rij], kb[Kolom]: Bomen(rb,kb) & Verbonden(rt, kt, rb, kb)} = 1).
+    
     
     
     /** evenveel tenten als bomen **/
@@ -134,26 +179,24 @@ theory T: V {
     /** Tenten mogen elkaar niet raken **/
     // Definieer wat een buur is
     {
-        !r1, r2, k1, k2: Buren(r1, k1, r2, k2) <- ((r1 = r2+1) & (k1 = k2)).	// Niet raken verticaal
-        //!r1, r2, k1, k2: Buren(r1, k1, r2, k2) <- ((r1 = r2-1) & (k1 = k2)).
+        !r1, r2, k1, k2: BurenHV(r1, k1, r2, k2) <- ((r1 = r2+1) & (k1 = k2)).	// Niet raken verticaal
         
-		!r1, r2, k1, k2: Buren(r1, k1, r2, k2) <- ((r1 = r2)   & (k1 = k2+1)).	// Niet raken horizontaal
-        //!r1, r2, k1, k2: Buren(r1, k1, r2, k2) <- ((r1 = r2)   & (k1 = k2-1)).
+		!r1, r2, k1, k2: BurenHV(r1, k1, r2, k2) <- ((r1 = r2)   & (k1 = k2+1)).	// Niet raken horizontaal
         
-        !r1, r2, k1, k2: Buren(r1, k1, r2, k2) <- ((r1 = r2-1) & (k1 = k2-1)).	// Niet op Hoofddiagonaal
-        !r1, r2, k1, k2: Buren(r1, k1, r2, k2) <- ((r1 = r2+1) & (k1 = k2+1)).
+        !r1, r2, k1, k2: BurenDiagonaal(r1, k1, r2, k2) <- ((r1 = r2-1) & (k1 = k2-1)).	// Niet op Hoofddiagonaal
+        !r1, r2, k1, k2: BurenDiagonaal(r1, k1, r2, k2) <- ((r1 = r2+1) & (k1 = k2+1)).
         
-        !r1, r2, k1, k2: Buren(r1, k1, r2, k2) <- ((r1 = r2+1) & (k1 = k2-1)).	// Niet op 2de diagonaal
-        !r1, r2, k1, k2: Buren(r1, k1, r2, k2) <- ((r1 = r2-1) & (k1 = k2+1)).
+        !r1, r2, k1, k2: BurenDiagonaal(r1, k1, r2, k2) <- ((r1 = r2+1) & (k1 = k2-1)).	// Niet op 2de diagonaal
+        !r1, r2, k1, k2: BurenDiagonaal(r1, k1, r2, k2) <- ((r1 = r2-1) & (k1 = k2+1)).
     }
     
     // Tenten mogen geen buren zijn
-    !r1, r2, k1, k2: Tenten(r1, k1) & Tenten(r2, k2) => ~Buren(r1, k1, r2, k2).
-    
+    !r1, r2, k1, k2: Tenten(r1, k1) & Tenten(r2, k2) => ~BurenHV(r1, k1, r2, k2) & ~BurenDiagonaal(r1, k1, r2, k2).
 }
 
 procedure main() {
     stdoptions.nbmodels = 5
     printmodels(modelexpand(T, Moeilijk))
+    //printmodels(modelexpand(T, Medium))
     //printmodels(modelexpand(T, Voorbeeld))
 }
